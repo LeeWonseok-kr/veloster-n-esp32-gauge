@@ -203,7 +203,7 @@ void TftDashboard::footer(const gaugev4::model::Frame& f) {
   using namespace gaugev4::alerts;
   tft_.fillRect(0,303,480,17,TFT_BLACK);
   if(drawingSweep_){
-    text("STARTUP DEMO",240,307,1,TFT_CYAN,470);
+    text(sweep_.waiting(millis())?"WAITING FOR DATA - DEMO":"STARTUP DEMO",240,307,1,TFT_CYAN,470);
     tft_.fillRect(4,68,472,2,TFT_BLACK);
     push(0,303,480,17);push(4,68,472,2);statusDirty_=false;return;
   }
@@ -255,9 +255,13 @@ void TftDashboard::render(const gaugev4::model::Frame& incoming) {
   auto source=incoming;
 #if GAUGE_LED_CONTROL
   if(incoming.dataState==gaugev4::alerts::DataState::Off)sweep_.cancel();
+  sweep_.update(millis(),incoming);
   const bool demo=bootSweepActive();
   if(drawingSweep_!=demo){hasPrevious_=false;statusDirty_=true;}
   drawingSweep_=demo;
+  const bool waiting=sweep_.waiting(millis());
+  if(drawingWait_!=waiting)statusDirty_=true;
+  drawingWait_=waiting;
   if(demo)source=sweep_.frame(millis());
 #endif
   const auto f=nextSlice(source);

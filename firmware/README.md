@@ -1,9 +1,9 @@
 # No-sleep startup ceremony firmware
 
-Release: `v2026.11.02-nosleep` / STATUS build `20261102_r9_nosleep`.
+Release: `v2026.11.02-nosleep-ready` / STATUS build `20261102_r9_nosleep`.
 Target: existing ESP32-S3 N16R8 development board and ILI9488 display. **Not the custom PCB.**
 
-This version removes the automatic sleep/wake lifecycle. At power-on it shows a 2.2-second display-only minimum–maximum–minimum sweep, then live readings (or missing-data placeholders). CAN starts after the existing 3-second startup delay. GPIO13 controls the backlight and stays on while powered, including when the engine stops. A brief error or STOP still halts CAN requests; there is no automatic retry. Existing reset lockout protections remain.
+This version removes the automatic sleep/wake lifecycle. CAN acquisition starts during the 6.6-second minimum–maximum–minimum startup sweep, without the former 3-second delay. After the sweep, the display waits for RPM, speed, coolant/oil/intake temperatures, ECU voltage, pedal, boost, brake and all four tire pressure/temperature readings. It switches to live readings when these fields are available. Unconfirmed neutral/gear is not a readiness requirement. Waiting ends at 15 seconds from sweep start even if fields remain unavailable; those fields show `--`. The waiting screen is labeled as a demo, not live data. Fault or STOP cancels the ceremony immediately. GPIO13 stays on while powered. Existing request limits, reset lockout and no-automatic-retry protections remain.
 
 **Disconnect gauge power when parking. This is not a low-power parking firmware.** An always-live OBD supply can drain the vehicle battery. GPIO13 remains connected to the TFT LED control input; all other wiring is unchanged.
 
@@ -32,7 +32,7 @@ After flashing without OBD, the first CAN request may fault as expected under th
 
 ## Verification and limitations
 
-Host checks cover no sleep-controller calls, startup sweep endpoints, return to actual/missing readings, GPIO13 remaining on for a 60-second zero-RPM display simulation, and the existing ten-minute paired-query tests with rate/error/STOP protection. A clean source-package build passed before publication. The final release notes describe actual build/upload results. New-version road testing is not claimed.
+Host checks cover no sleep-controller calls, startup sweep endpoints, return to actual/missing readings, GPIO13 remaining on for a 60-second zero-RPM display simulation, and the existing ten-minute paired-query tests with rate/error/STOP protection. Readiness tests cover minimum duration, missing TPMS, completion latching, timeout, STOP, timer wrap and renderer transition. The final release notes describe actual build/upload results. New-version road testing is not claimed.
 
 ## Dependencies and licensing
 

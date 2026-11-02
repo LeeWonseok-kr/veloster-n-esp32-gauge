@@ -53,7 +53,7 @@ void setup() {
   if (!display.begin()) locked = true;
 
   faultMarker = locked ? kFaultMagic : 0;
-  gauge.begin(millis(), locked);
+  gauge.begin(millis(), locked, 0);
   if(!locked)display.startBootSweep();
   display.render(gaugev4::model::buildFrame(gauge, millis()));
   display.setBacklight(true);
@@ -62,7 +62,7 @@ void setup() {
   Serial.printf("OBD_DISPLAY reset=%u lockout=%u ALL_CANDIDATES_UNVERIFIED GPIO13_CONTROL NO_AUTO_SLEEP\n",
                 static_cast<unsigned>(reset), locked ? 1u : 0u);
   Serial.println(gaugev4::kPairContinuous
-      ? "NO_SLEEP_CEREMONY build=20261102_r9_nosleep AUTO_START_3S rate=20 CONTINUOUS NO_AUTO_RETRY STOP_LATCHES_OFF"
+      ? "NO_SLEEP_CEREMONY build=20261102_r9_nosleep_parallel AUTO_START_IMMEDIATE rate=20 CONTINUOUS NO_AUTO_RETRY STOP_LATCHES_OFF"
       : gaugev4::kPairTrial
       ? "DRIVE_V8_8_PAIR_R7 MANUAL START PAIR DRIVE 20 ONE_60S_TRIAL NO_AUTO_RETRY"
       : gaugev4::kPairProbe

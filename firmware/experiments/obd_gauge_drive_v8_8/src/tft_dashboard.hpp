@@ -34,4 +34,5 @@ class TftDashboard final {
   unsigned slowCell_{0};
   gaugev4::startup::Sweep sweep_;
   bool drawingSweep_{false};
+  bool drawingWait_{false};
 };

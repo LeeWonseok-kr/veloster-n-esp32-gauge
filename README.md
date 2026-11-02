@@ -43,30 +43,10 @@ See the [wiring notes](docs/wiring.md) for connections and power conditions. Thi
 
 ## No-sleep release
 
-[Download v2026.11.02-nosleep](https://github.com/LeeWonseok-kr/veloster-n-esp32-gauge/releases/tag/v2026.11.02-nosleep) · [Source and flashing instructions](firmware/README.md)
+[Download v2026.11.02-nosleep-ready](https://github.com/LeeWonseok-kr/veloster-n-esp32-gauge/releases/tag/v2026.11.02-nosleep-ready) · [Source and flashing instructions](firmware/README.md)
 
-This release removes automatic sleep and ignition wake detection. It shows a startup sweep once at power-on, then runs the continuous gauge with GPIO13 backlight control. **Disconnect power when parked: this version does not save parking battery power.** CAN faults and STOP still halt requests without automatic retries. Host tests and a clean source build passed. USB flashing and flash hashes were verified; a short post-upload capture showed live data at zero vehicle speed with no reported CAN errors or drops. Startup appearance and long-term vehicle operation still require validation.
+This release removes automatic sleep and ignition wake detection. CAN acquisition runs during a 6.6-second startup sweep. The display then switches to live data once the required fields are ready, with a 15-second upper bound for unavailable readings. See the firmware instructions for the exact readiness criteria. **Disconnect power when parked: this version does not save parking battery power.** Faults and STOP still halt requests without automatic retries.
 
-## Earlier sleep-version status — November 2, 2026
+## Verification and remaining validation
 
-| Version or feature | Status |
-|---|---|
-| Last firmware flashed to the board | `20261102_r8_sweep`: a brief screen-off transition was observed after the sweep and before CAN data appeared |
-| Next firmware prepared | `20261102_r8_canfirst`: confirm CAN/RPM → startup sweep → live readings. Host-tested and built, **not yet flashed** |
-| Sleep in the prepared version | Enter sleep after fresh RPM and speed readings remain zero for 5 seconds; remove the redundant 3-second delay after confirmed readiness |
-| Ignition-on waiting | Only while valid zero-RPM replies continue: at least 5 seconds between checks, for up to 2 minutes. No-response and fault limits remain in place |
-
-The firmware version shown in the supplied media has not been established from the photo or video. The media is not evidence that the unflashed version works on hardware.
-
-Five host sleep test scripts, 19 existing regression test scripts, and builds for both the development-board and PCB configurations passed. Additional seven-day policy simulations confirmed no further transmission after three unanswered boot probes, and a maximum of 24 queries with continuous valid zero-RPM replies. These were simulations, not current measurements or seven-day vehicle tests.
-
-## Remaining validation
-
-- Actual sweep-to-live transition and repeated engine-stop/start recovery with the CAN-first version
-- Total standby current at the 12 V input, using vehicle power with USB disconnected
-- Reducing unnecessary timer wakeups during long parking periods
-- Comparing boost, tire, and temperature readings against the factory displays
-
-A dark screen does not mean the entire assembly is powered off. The development board, BEC, and CAN module still draw standby current, so long-term parking safety has not yet been established.
-
-This repository contains operation notes, media, and wiring documentation. It does not include the complete development environment, raw vehicle logs, ECU identity records, personal filesystem paths, or credentials.
+Host readiness and renderer tests passed, including missing-data timeout, STOP and timer wrap. The development-board build and USB flash verification passed. The uploaded application SHA256 is `0d713dea0aa5e32fe7dcce3875a6cb477474fa65f8a4d1592917719c9ba35242`. Actual startup-to-live timing in the vehicle remains unverified for this revision. The supplied media predates this change and does not validate it. Boost, tire and temperature comparisons against factory displays retain their existing limitations.
