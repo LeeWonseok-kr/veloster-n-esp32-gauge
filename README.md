@@ -41,7 +41,13 @@ Unconfirmed neutral, continuous clutch position, brake pressure, and driving mod
 
 See the [wiring notes](docs/wiring.md) for connections and power conditions. This diagram covers the current development-board assembly, not the separate integrated PCB design.
 
-## Firmware status — November 2, 2026
+## No-sleep release
+
+[Download v2026.11.02-nosleep](https://github.com/LeeWonseok-kr/veloster-n-esp32-gauge/releases/tag/v2026.11.02-nosleep) · [Source and flashing instructions](firmware/README.md)
+
+This release removes automatic sleep and ignition wake detection. It shows a startup sweep once at power-on, then runs the continuous gauge with GPIO13 backlight control. **Disconnect power when parked: this version does not save parking battery power.** CAN faults and STOP still halt requests without automatic retries. Host tests and a clean source build passed. USB flashing and flash hashes were verified; a short post-upload capture showed live data at zero vehicle speed with no reported CAN errors or drops. Startup appearance and long-term vehicle operation still require validation.
+
+## Earlier sleep-version status — November 2, 2026
 
 | Version or feature | Status |
 |---|---|
