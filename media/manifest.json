@@ -1,0 +1,11 @@
+{
+  "gauge-driving.png": {
+    "bytes": 734794,
+    "sha256": "511af66d6e9981a47b9615e2886a4b782f7e783f8b11ecfa4a287f06dbfb22ff"
+  },
+  "gauge-operation.mp4": {
+    "bytes": 8243555,
+    "sha256": "13289fbc217254c51d876b5494e39be2cab9b9790ca3bb6096369e96ce964ce7",
+    "duration_seconds": 20.534
+  }
+}
