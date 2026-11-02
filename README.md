@@ -1,66 +1,66 @@
-# 벨로스터 N ESP32-S3 OBD 게이지
+# Veloster N ESP32-S3 OBD Gauge
 
-2018년식 벨로스터 N 수동 차량에 사용하는 자작 게이지의 작동 기록입니다. ESP32-S3와 3.5인치 ILI9488 화면으로 OBD 데이터를 표시합니다.
+A DIY OBD gauge for a 2018 Hyundai Veloster N with a manual transmission. An ESP32-S3 drives a 3.5-inch ILI9488 display to show vehicle data.
 
-## 작동 사진과 영상
+## Photos and video
 
-![차량에서 작동 중인 게이지](media/gauge-driving.png)
+![Gauge operating in the vehicle](media/gauge-driving.png)
 
-[작동 영상 보기 / 다운로드 (MP4)](media/gauge-operation.mp4)
+[Watch or download the operation video (MP4)](media/gauge-operation.mp4)
 
-사진·영상은 사용자가 제공한 원본입니다. 사진에서는 중앙 기어, RPM, 속도, 타이어 공기압·온도, 엔진 관련 온도와 게이지 표시를 확인할 수 있습니다. 사진의 순정 속도계와 게이지 속도는 동일하게 표시되지 않으며, 이 사진만으로 보정 정확도를 판정하지 않습니다. 영상은 원본을 첨부했으며 프레임별 동작 검증을 수행한 자료는 아닙니다. 원본 파일 해시와 영상 컨테이너 길이는 [미디어 정보](media/manifest.json)에 있습니다.
+The photo and video are the original files supplied by the owner. The photo shows the central gear indicator, RPM, vehicle speed, tire pressures and temperatures, and engine-related readings. The factory speedometer and the gauge show different speeds in this photo; this alone does not establish calibration accuracy. The video is included as supplied and has not undergone frame-by-frame validation. File hashes and the video duration are listed in the [media manifest](media/manifest.json).
 
-## 구성
+## Hardware
 
-- ESP32-S3 N16R8 개발보드
-- 3.5인치 480×320 SPI TFT, ILI9488
-- 기존 3.3V CAN 트랜시버 모듈
-- 차량 12V → 기존 BEC 5V 전원
-- OBD CAN: 11bit ID, 500kbps. 엔진 표준 응답 ID 0x7E8
-- 능동 진단 요청 방식. 초기 RX-only 로거와 구분합니다.
+- ESP32-S3 N16R8 development board
+- 3.5-inch 480 × 320 SPI TFT with an ILI9488 controller
+- Existing 3.3 V CAN transceiver module
+- Vehicle 12 V supply through the existing 5 V BEC regulator
+- OBD CAN: 11-bit identifiers at 500 kbit/s; standard engine response ID `0x7E8`
+- Active diagnostic requests; this configuration differs from the earlier RX-only logger
 
-## 표시 데이터
+## Displayed data
 
-| 항목 | 구현 방식과 제한 |
+| Reading | Implementation and limitations |
 |---|---|
-| RPM·차속 | 표준 OBD PID 0C·0D 묶음 조회 |
-| ACC | 가속페달 PID 값을 raw 38→213 기준으로 0→100% 표시. 스로틀 밸브 개도와 구분 |
-| REL 부스트 | (MAP−BARO)/100 + 0.60 bar. 사용자 선택 표시 원점 이동이며 순정 부스트와 동일함을 보장하지 않음 |
-| 냉각수·흡기온·ECU 전압 | 지원되는 ECU 응답 표시. ECU 전압은 별도 배터리 단자 실측값이 아님 |
-| 오일온도 | 관측한 확장 진단 응답 기반 참고값 |
-| 타이어 공기압·온도 | TPMS 확장 응답 참고값. 위치·환산·센서 갱신 지연의 검증 한계 있음 |
-| 전진 기어 | RPM/차속 비율 추정. 확정 기어 센서값 아님 |
-| 후진 | 관측한 진단 응답 후보 기반 |
-| 브레이크 | ON/OFF 참고값. 압력 bar가 아님 |
+| RPM and vehicle speed | Combined queries for standard OBD PIDs `0C` and `0D` |
+| ACC | Accelerator pedal PID normalized from raw 38–213 to 0–100%; not throttle plate position |
+| REL boost | `(MAP − BARO) / 100 + 0.60` bar, with MAP and BARO in kPa. The owner-selected display offset is not a verified match to the factory boost gauge |
+| Coolant, intake temperature, ECU voltage | Supported ECU readings. ECU voltage is not an independent measurement at the battery terminals |
+| Oil temperature | Reference reading derived from an observed extended diagnostic response |
+| Tire pressures and temperatures | Reference readings from extended TPMS responses; wheel mapping, conversion, and sensor update latency have validation limits |
+| Forward gear | Estimated from the RPM-to-speed ratio; not a confirmed gear position sensor reading |
+| Reverse | Based on an observed diagnostic response candidate |
+| Brake | ON/OFF reference indication, not hydraulic pressure in bar |
 
-미확정 중립·클러치 연속값·브레이크 압력·주행 모드는 지원 기능으로 표시하지 않습니다. 실제 타이어 기준은 235/35 R19입니다.
+Unconfirmed neutral, continuous clutch position, brake pressure, and driving mode data are not presented as supported features. The tire size used for gear estimation is **235/35 R19**.
 
-## 배선
+## Wiring
 
-![개발보드 배선 개요](docs/wiring.svg)
+![Development-board wiring overview](docs/wiring.svg)
 
-상세 연결 및 전원 조건은 [배선 설명](docs/wiring.md)을 참고하세요. 배선도는 현재 개발보드 구성으로, 별도 설계 중인 통합 PCB와 다릅니다.
+See the [wiring notes](docs/wiring.md) for connections and power conditions. This diagram covers the current development-board assembly, not the separate integrated PCB design.
 
-## 펌웨어 상태 — 2026-11-02
+## Firmware status — November 2, 2026
 
-| 구분 | 상태 |
+| Version or feature | Status |
 |---|---|
-| 실제 보드에 마지막 업로드한 판 | `20261102_r8_sweep` — CAN 확인 전 스윕 후 화면이 한 번 꺼지는 현상 확인 |
-| 다음 업로드 준비판 | `20261102_r8_canfirst` — CAN/RPM 확인 → 스윕 → 실제 값. PC 검증·빌드 완료, 미업로드 |
-| 준비판 슬립 | 신선한 RPM0+속도0이 5초 지속되면 절전. 확인된 시동 복귀의 중복 3초 대기 제거 |
-| IGN ON 대기 | 정상 RPM0 응답이 오는 동안만 최소5초 간격, 최대2분. 무응답·오류는 제한 유지 |
+| Last firmware flashed to the board | `20261102_r8_sweep`: a brief screen-off transition was observed after the sweep and before CAN data appeared |
+| Next firmware prepared | `20261102_r8_canfirst`: confirm CAN/RPM → startup sweep → live readings. Host-tested and built, **not yet flashed** |
+| Sleep in the prepared version | Enter sleep after fresh RPM and speed readings remain zero for 5 seconds; remove the redundant 3-second delay after confirmed readiness |
+| Ignition-on waiting | Only while valid zero-RPM replies continue: at least 5 seconds between checks, for up to 2 minutes. No-response and fault limits remain in place |
 
-첨부 미디어의 촬영 펌웨어 버전은 영상/사진만으로 확정하지 않았습니다. 미업로드 준비판의 작동 증거로 사용하지 않습니다.
+The firmware version shown in the supplied media has not been established from the photo or video. The media is not evidence that the unflashed version works on hardware.
 
-PC 절전 시험5개 및 기존 회귀 시험19개, 개발보드/PCB 두 빌드가 통과했습니다. 추가 7일 모의 시험에서 무응답 시 최초3회 이후 송신 없음, 정상 RPM0 연속 조건에서는 최대24회 이후 중단을 확인했습니다. 이는 실제 전류 측정이나 7일 실차 시험이 아닙니다.
+Five host sleep test scripts, 19 existing regression test scripts, and builds for both the development-board and PCB configurations passed. Additional seven-day policy simulations confirmed no further transmission after three unanswered boot probes, and a maximum of 24 queries with continuous valid zero-RPM replies. These were simulations, not current measurements or seven-day vehicle tests.
 
-## 남은 확인
+## Remaining validation
 
-- CAN 우선 준비판의 실제 스윕→수치 전환과 반복 시동 복귀
-- USB를 분리한 차량 전원 구성의 전체 12V 입력 대기전류
-- 장기 주차 중 불필요한 타이머 깨움 감소 검토
-- 순정 화면과 부스트·타이어·온도 표시 비교
+- Actual sweep-to-live transition and repeated engine-stop/start recovery with the CAN-first version
+- Total standby current at the 12 V input, using vehicle power with USB disconnected
+- Reducing unnecessary timer wakeups during long parking periods
+- Comparing boost, tire, and temperature readings against the factory displays
 
-화면 OFF는 전체 전원 차단이 아닙니다. 개발보드, BEC, CAN 모듈의 대기전류가 남으므로 장기 주차 안전을 아직 보장하지 않습니다.
+A dark screen does not mean the entire assembly is powered off. The development board, BEC, and CAN module still draw standby current, so long-term parking safety has not yet been established.
 
-이 저장소는 작동 기록·미디어·배선 설명용입니다. 전체 개발환경, 차량 원문 로그, ECU 식별정보, 개인 경로와 인증정보는 포함하지 않습니다.
+This repository contains operation notes, media, and wiring documentation. It does not include the complete development environment, raw vehicle logs, ECU identity records, personal filesystem paths, or credentials.
